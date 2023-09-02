@@ -1,25 +1,25 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
-import axios from 'axios';
-import { AiFillGithub } from 'react-icons/ai';
-import { FcGoogle } from 'react-icons/fc';
 import { useCallback, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { signIn } from 'next-auth/react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import { FcGoogle } from 'react-icons/fc';
+import { AiFillGithub } from 'react-icons/ai';
+import { useRouter } from 'next/navigation';
 
 import useRegisterModal from '@/app/hooks/useRegisterModal';
 import useLoginModal from '@/app/hooks/useLoginModal';
+
 import Modal from './Modal';
-import Heading from '../Heading';
 import Input from '../inputs/Input';
+import Heading from '../Heading';
 import Button from '../Button';
-import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
 
 const LoginModal = () => {
   const router = useRouter();
+  const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
-  const LoginModal = useLoginModal();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -36,18 +36,28 @@ const LoginModal = () => {
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
 
-    signIn('credentials', { ...data, redirect: false }).then((callback) => {
+    signIn('credentials', {
+      ...data,
+      redirect: false,
+    }).then((callback) => {
       setIsLoading(false);
+
       if (callback?.ok) {
         toast.success('Logged in');
         router.refresh();
-        LoginModal.onClose();
+        loginModal.onClose();
       }
+
       if (callback?.error) {
         toast.error(callback.error);
       }
     });
   };
+
+  const onToggle = useCallback(() => {
+    loginModal.onClose();
+    registerModal.onOpen();
+  }, [loginModal, registerModal]);
 
   const bodyContent = (
     <div className="flex flex-col gap-4">
@@ -62,8 +72,8 @@ const LoginModal = () => {
       />
       <Input
         id="password"
-        type="password"
         label="Password"
+        type="password"
         disabled={isLoading}
         register={register}
         errors={errors}
@@ -89,25 +99,22 @@ const LoginModal = () => {
       />
       <div
         className="
-          text-neutral-500 
-          text-center 
-          mt-4 
-          font-light
-        "
+      text-neutral-500 text-center mt-4 font-light"
       >
-        <div className="justify-center text-center flex flex-row items-center gap-2">
-          <div>Already have an account?</div>
-          <div
-            onClick={registerModal.onClose}
+        <p>
+          First time using Airbnb?
+          <span
+            onClick={onToggle}
             className="
               text-neutral-800
-              cursor-pointer
+              cursor-pointer 
               hover:underline
             "
           >
-            Log in
-          </div>
-        </div>
+            {' '}
+            Create an account
+          </span>
+        </p>
       </div>
     </div>
   );
@@ -115,10 +122,10 @@ const LoginModal = () => {
   return (
     <Modal
       disabled={isLoading}
-      isOpen={LoginModal.isOpen}
+      isOpen={loginModal.isOpen}
       title="Login"
       actionLabel="Continue"
-      onClose={LoginModal.onClose}
+      onClose={loginModal.onClose}
       onSubmit={handleSubmit(onSubmit)}
       body={bodyContent}
       footer={footerContent}
