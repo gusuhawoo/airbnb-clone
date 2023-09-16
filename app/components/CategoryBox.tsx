@@ -10,6 +10,7 @@ interface CategoryBoxProps {
   label: string;
   selected?: boolean;
 }
+
 const CategoryBox: React.FC<CategoryBoxProps> = ({
   icon: Icon,
   label,
@@ -49,10 +50,10 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({
     <div
       onClick={handleClick}
       className={`
-        flex
-        flex-col
-        items-center
-        justify-center
+        flex 
+        flex-col 
+        items-center 
+        justify-center 
         gap-2
         p-3
         border-b-2
